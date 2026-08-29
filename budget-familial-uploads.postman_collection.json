@@ -1,0 +1,81 @@
+{
+  "info": {
+    "name": "Budget Familial API - Uploads PDF",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "compteId",
+      "value": "bae83927-49ec-4c5a-85c9-18ef0906428a",
+      "description": "UUID d'un compte existant (GET /comptes pour la liste)"
+    }
+  ],
+  "item": [
+    {
+      "name": "1 - Extraire texte PDF (diagnostic, étape 2)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-API-VERSION", "value": "v1" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "fichier", "type": "file", "src": [] }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:8080/extraction/texte",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["extraction", "texte"]
+        }
+      }
+    },
+    {
+      "name": "2 - Catégoriser PDF (diagnostic, étape 3, sans sauvegarde)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-API-VERSION", "value": "v1" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "fichier", "type": "file", "src": [] }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:8080/categorisation/pdf",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["categorisation", "pdf"]
+        }
+      }
+    },
+    {
+      "name": "3 - Importer relevé sur un compte (persistance, étape 4)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-API-VERSION", "value": "v1" }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "fichier", "type": "file", "src": [] }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:8080/comptes/{{compteId}}/releves",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["comptes", "{{compteId}}", "releves"]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: budget-familial-postgres
+    environment:
+      POSTGRES_DB: budget_familial
+      POSTGRES_USER: budget_familial
+      POSTGRES_PASSWORD: budget_familial
+    ports:
+      - "5432:5432"
+    volumes:
+      - budget-familial-pgdata:/var/lib/postgresql/data
+
+volumes:
+  budget-familial-pgdata:

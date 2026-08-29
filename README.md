@@ -25,9 +25,12 @@ par catégorie, par période et par compte.
 2. `./mvnw spring-boot:run`
 3. Vérifier : `curl -H "X-API-VERSION: v1" http://localhost:8080/sante`
 
-## Prochaines étapes
+## Base de données locale (dev)
 
-2. Extraction du texte des PDF (Apache PDFBox).
-3. Structuration des transactions par IA (Spring AI + Claude Haiku).
-4. Persistance des relevés et transactions.
-5. Agrégation par catégorie / période / compte.
+`docker compose up -d` lance un Postgres local (port 5432).
+`./mvnw spring-boot:run -Dspring-boot.run.profiles=local` s'y connecte au lieu de Neon.
+
+```bash
+docker compose up -d
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+```
