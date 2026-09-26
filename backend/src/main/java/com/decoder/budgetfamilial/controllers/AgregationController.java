@@ -2,6 +2,7 @@ package com.decoder.budgetfamilial.controllers;
 
 import com.decoder.budgetfamilial.dtos.AgregationDto;
 import com.decoder.budgetfamilial.models.TitulaireCompte;
+import com.decoder.budgetfamilial.models.TypeCompte;
 import com.decoder.budgetfamilial.services.AgregationService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -29,7 +30,9 @@ public class AgregationController {
             @RequestParam("debut") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate debut,
             @RequestParam("fin") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin,
             @RequestParam(value = "titulaire", required = false) TitulaireCompte titulaire,
-            @RequestParam(value = "compteId", required = false) UUID compteId) {
-        return ResponseEntity.status(HttpStatus.OK).body(agregationService.calculer(debut, fin, titulaire, compteId));
+            @RequestParam(value = "compteId", required = false) UUID compteId,
+            @RequestParam(value = "typeCompte", required = false) TypeCompte typeCompte) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(agregationService.calculer(debut, fin, titulaire, compteId, typeCompte));
     }
 }

@@ -3,6 +3,7 @@ package com.decoder.budgetfamilial.services;
 import com.decoder.budgetfamilial.dtos.TransactionAffichageDto;
 import com.decoder.budgetfamilial.models.CategorieDepense;
 import com.decoder.budgetfamilial.models.TitulaireCompte;
+import com.decoder.budgetfamilial.models.TypeCompte;
 import com.decoder.budgetfamilial.repositories.TransactionRepository;
 import org.springframework.stereotype.Service;
 
@@ -25,8 +26,9 @@ public class TransactionService {
     public List<TransactionAffichageDto> rechercher(LocalDate debut, LocalDate fin,
                                                     CategorieDepense categorie,
                                                     TitulaireCompte titulaire,
-                                                    UUID compteId) {
-        return transactionRepository.rechercher(debut, fin, categorie, titulaire, compteId).stream()
+                                                    UUID compteId,
+                                                    TypeCompte typeCompte) {
+        return transactionRepository.rechercher(debut, fin, categorie, titulaire, compteId, typeCompte).stream()
                 .map(transaction -> new TransactionAffichageDto(
                         transaction.getDate(),
                         transaction.getDescription(),

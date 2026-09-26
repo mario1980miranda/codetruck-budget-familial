@@ -3,6 +3,7 @@ package com.decoder.budgetfamilial.repositories;
 import com.decoder.budgetfamilial.models.CategorieDepense;
 import com.decoder.budgetfamilial.models.TitulaireCompte;
 import com.decoder.budgetfamilial.models.TransactionModele;
+import com.decoder.budgetfamilial.models.TypeCompte;
 import com.decoder.budgetfamilial.models.TypeTransaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,12 +25,14 @@ public interface TransactionRepository extends JpaRepository<TransactionModele, 
               AND t.date BETWEEN :debut AND :fin
               AND (:titulaire IS NULL OR t.releve.compte.titulaire = :titulaire)
               AND (:compteId IS NULL OR t.releve.compte.id = :compteId)
+              AND (:typeCompte IS NULL OR t.releve.compte.typeCompte = :typeCompte)
             GROUP BY t.categorie
             """)
     List<Object[]> totauxParCategorie(@Param("debut") LocalDate debut,
                                       @Param("fin") LocalDate fin,
                                       @Param("titulaire") TitulaireCompte titulaire,
-                                      @Param("compteId") UUID compteId);
+                                      @Param("compteId") UUID compteId,
+                                      @Param("typeCompte") TypeCompte typeCompte);
 
     @Query("""
             SELECT COALESCE(SUM(t.montant), 0)
@@ -38,12 +41,14 @@ public interface TransactionRepository extends JpaRepository<TransactionModele, 
               AND t.date BETWEEN :debut AND :fin
               AND (:titulaire IS NULL OR t.releve.compte.titulaire = :titulaire)
               AND (:compteId IS NULL OR t.releve.compte.id = :compteId)
+              AND (:typeCompte IS NULL OR t.releve.compte.typeCompte = :typeCompte)
             """)
     BigDecimal totalParType(@Param("typeTransaction") TypeTransaction typeTransaction,
                             @Param("debut") LocalDate debut,
                             @Param("fin") LocalDate fin,
                             @Param("titulaire") TitulaireCompte titulaire,
-                            @Param("compteId") UUID compteId);
+                            @Param("compteId") UUID compteId,
+                            @Param("typeCompte") TypeCompte typeCompte);
 
     @Query("""
             SELECT t FROM TransactionModele t
@@ -51,11 +56,13 @@ public interface TransactionRepository extends JpaRepository<TransactionModele, 
               AND (:categorie IS NULL OR t.categorie = :categorie)
               AND (:titulaire IS NULL OR t.releve.compte.titulaire = :titulaire)
               AND (:compteId IS NULL OR t.releve.compte.id = :compteId)
+              AND (:typeCompte IS NULL OR t.releve.compte.typeCompte = :typeCompte)
             ORDER BY t.date ASC
             """)
     List<TransactionModele> rechercher(@Param("debut") LocalDate debut,
                                        @Param("fin") LocalDate fin,
                                        @Param("categorie") CategorieDepense categorie,
                                        @Param("titulaire") TitulaireCompte titulaire,
-                                       @Param("compteId") UUID compteId);
+                                       @Param("compteId") UUID compteId,
+                                       @Param("typeCompte") TypeCompte typeCompte);
 }

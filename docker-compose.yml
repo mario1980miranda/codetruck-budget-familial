@@ -1,3 +1,10 @@
+# Démarre toute l'application en local, dans l'ordre :
+#   1. postgres  -> attend que la base réponde (pg_isready)
+#   2. backend   -> attend que GET /sante réponde {"statut":"OK"}
+#   3. frontend  -> attend que /api/sante réponde à travers nginx
+#
+#   docker compose up -d --build --wait   démarrer (et attendre que tout soit OK)
+#   docker compose down -v                arrêter ET vider la base de données
 services:
   postgres:
     image: postgres:17
@@ -7,9 +14,48 @@ services:
       POSTGRES_USER: budget_familial
       POSTGRES_PASSWORD: budget_familial
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - budget-familial-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U budget_familial -d budget_familial"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: budget-familial-backend
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/budget_familial
+      DB_USER: budget_familial
+      DB_PASSWORD: budget_familial
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?Copier .env.example en .env et renseigner ANTHROPIC_API_KEY}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs -H 'X-API-VERSION: v1' http://localhost:8080/sante | grep -q '\"statut\":\"OK\"'"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 60s
+
+  frontend:
+    build: ./frontend
+    container_name: budget-familial-frontend
+    ports:
+      - "8081:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- --header 'X-API-VERSION: v1' http://127.0.0.1/api/sante | grep -q '\"statut\":\"OK\"'"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
 volumes:
   budget-familial-pgdata:

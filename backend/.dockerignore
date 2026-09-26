@@ -1,0 +1,5 @@
+# Ne jamais copier les secrets (identifiants Neon, clé Anthropic) dans l'image.
+.env
+target/
+.idea/
+*.iml

@@ -3,6 +3,7 @@ package com.decoder.budgetfamilial.controllers;
 import com.decoder.budgetfamilial.dtos.TransactionAffichageDto;
 import com.decoder.budgetfamilial.models.CategorieDepense;
 import com.decoder.budgetfamilial.models.TitulaireCompte;
+import com.decoder.budgetfamilial.models.TypeCompte;
 import com.decoder.budgetfamilial.services.TransactionService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -32,8 +33,9 @@ public class TransactionController {
             @RequestParam("fin") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin,
             @RequestParam(value = "categorie", required = false) CategorieDepense categorie,
             @RequestParam(value = "titulaire", required = false) TitulaireCompte titulaire,
-            @RequestParam(value = "compteId", required = false) UUID compteId) {
+            @RequestParam(value = "compteId", required = false) UUID compteId,
+            @RequestParam(value = "typeCompte", required = false) TypeCompte typeCompte) {
         return ResponseEntity.status(HttpStatus.OK)
-                .body(transactionService.rechercher(debut, fin, categorie, titulaire, compteId));
+                .body(transactionService.rechercher(debut, fin, categorie, titulaire, compteId, typeCompte));
     }
 }

@@ -3,6 +3,7 @@ package com.decoder.budgetfamilial.services;
 import com.decoder.budgetfamilial.dtos.AgregationDto;
 import com.decoder.budgetfamilial.models.CategorieDepense;
 import com.decoder.budgetfamilial.models.TitulaireCompte;
+import com.decoder.budgetfamilial.models.TypeCompte;
 import com.decoder.budgetfamilial.models.TypeTransaction;
 import com.decoder.budgetfamilial.repositories.TransactionRepository;
 import org.springframework.stereotype.Service;
@@ -23,20 +24,21 @@ public class AgregationService {
         this.transactionRepository = transactionRepository;
     }
 
-    // Regroupe les dépenses par catégorie (filtrées par titulaire/compte si
-    // fournis), puis calcule les totaux de revenus, dépenses et épargne sur la
-    // période demandée avec les mêmes filtres.
-    public AgregationDto calculer(LocalDate debut, LocalDate fin, TitulaireCompte titulaire, UUID compteId) {
+    // Regroupe les dépenses par catégorie (filtrées par titulaire/compte/type
+    // de compte si fournis), puis calcule les totaux de revenus, dépenses et
+    // épargne sur la période demandée avec les mêmes filtres.
+    public AgregationDto calculer(LocalDate debut, LocalDate fin, TitulaireCompte titulaire,
+                                  UUID compteId, TypeCompte typeCompte) {
         Map<CategorieDepense, BigDecimal> depensesParCategorie = new EnumMap<>(CategorieDepense.class);
-        List<Object[]> lignes = transactionRepository.totauxParCategorie(debut, fin, titulaire, compteId);
+        List<Object[]> lignes = transactionRepository.totauxParCategorie(debut, fin, titulaire, compteId, typeCompte);
         for (Object[] ligne : lignes) {
             depensesParCategorie.put((CategorieDepense) ligne[0], (BigDecimal) ligne[1]);
         }
 
         BigDecimal totalDepenses = depensesParCategorie.values().stream()
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal totalRevenus = transactionRepository.totalParType(TypeTransaction.REVENU, debut, fin, titulaire, compteId);
-        BigDecimal totalEpargne = transactionRepository.totalParType(TypeTransaction.EPARGNE, debut, fin, titulaire, compteId);
+        BigDecimal totalRevenus = transactionRepository.totalParType(TypeTransaction.REVENU, debut, fin, titulaire, compteId, typeCompte);
+        BigDecimal totalEpargne = transactionRepository.totalParType(TypeTransaction.EPARGNE, debut, fin, titulaire, compteId, typeCompte);
 
         return new AgregationDto(debut, fin, totalRevenus, totalDepenses, totalEpargne, depensesParCategorie);
     }

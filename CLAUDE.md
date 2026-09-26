@@ -1,16 +1,25 @@
-# Budget Familial API (2026)
-Un service REST pour suivre les dépenses du foyer par catégorie et par compte, à partir de relevés bancaires PDF importés et catégorisés par IA.
+# Budget Familial (2026)
+Monorepo : un service REST (`backend/`) pour suivre les dépenses du foyer par catégorie et par compte, à partir de relevés bancaires PDF importés et catégorisés par IA, et une interface Vue (`frontend/`) qui affiche comptes, totaux et transactions par période.
 
 ## Stack
-* Java 25, Spring Boot 4.1, Maven
+* Backend : Java 25, Spring Boot 4.1, Maven
 * PostgreSQL sur Neon. Schéma généré par Hibernate ddl-auto: update. Pas d'outil de migration.
 * Spring AI avec Claude Haiku (Anthropic) pour la catégorisation — ajouté à l'étape 3
 * Apache PDFBox pour l'extraction du texte des PDF — ajouté à l'étape 2
+* Frontend : Vue 3 + Vite + TypeScript, Vue Router, Chart.js (vue-chartjs)
 * Tout le code et les identifiants en français
 
 ## Commandes
-* Lancer: `mvn spring-boot:run`
-* Build: `mvn -q verify`
+* Backend (depuis `backend/`, où se trouve `.env`) :
+  * Lancer: `./mvnw spring-boot:run`
+  * Build: `./mvnw -q verify`
+* Frontend (depuis `frontend/`) :
+  * Lancer: `npm run dev` (http://localhost:5173, proxy `/api` → backend :8080)
+  * Build: `npm run build` (vérification des types + build)
+* Tout en Docker (depuis la racine, `.env` avec `ANTHROPIC_API_KEY`) :
+  * Lancer: `docker compose up -d --build --wait` (postgres → backend → frontend, chacun attend le healthcheck du précédent ; app sur http://localhost:8081)
+  * Vider la base locale: `docker compose down -v`
+  * Postgres local exposé sur le port 5433 (profil Spring `local`)
 
 ## Nommage
 * Tables: tb_<nom_pluriel> - ex. tb_comptes
@@ -28,7 +37,7 @@ Un service REST pour suivre les dépenses du foyer par catégorie et par compte,
 * Ne pas inclure de logging sauf si explicitement demandé.
 * Ne jamais changer ddl-auto autrement que update.
 * Utiliser des identifiants de type UUID.
-* Après chaque changement de code, lancer `mvn -q verify` avant de considérer la tâche terminée.
+* Après chaque changement de code backend, lancer `./mvnw -q verify` (dans `backend/`) avant de considérer la tâche terminée ; après un changement frontend, `npm run build` (dans `frontend/`).
 * Ne jamais envoyer à l'API Claude un numéro de compte, de contrat ou une adresse en clair — masquer ces motifs dans le texte extrait avant l'appel (voir étape 2/3).
 * Les virements entre comptes personnels (paiement de carte de crédit, virement compte à compte) sont catégorisés TRANSFERT_INTERNE et exclus des totaux de dépenses/épargne.
 
@@ -50,13 +59,26 @@ Ce code est pour l'auto-apprentissage et la pratique ; il est possible que j'aie
 * Toute méthode avec une `boucle`, une `branche conditionnelle`, ou `plus d'un appel à un collaborateur`, commenter ce que fait le code avant son annotation (quand elle existe) et avant sa déclaration. NE JAMAIS commenter à l'intérieur des lignes de la méthode sauf si demandé.
 * Ne pas ajouter de fonctionnalités qui n'ont pas été demandées.
 
+## Frontend
+* Composants en `<script setup lang="ts">` (Composition API).
+* Tous les appels HTTP passent par `frontend/src/api/` (via `client.ts`, qui ajoute l'en-tête `X-API-VERSION: v1`) — jamais de `fetch` dans les composants.
+* Les types de `frontend/src/types/budget.ts` sont le miroir des enums et des objets JSON du backend : les mettre à jour quand le backend change.
+
 ## Disposition
 ```text
-src/main/java/com/decoder/budgetfamilial/
-controllers/   Contrôleurs REST
-services/      Règles métier
-repositories/  Interfaces Spring Data JPA
-models/        Entités JPA
-dtos/          Records d'entrée
-configs/       Configuration Spring
+backend/src/main/java/com/decoder/budgetfamilial/
+  controllers/   Contrôleurs REST
+  services/      Règles métier
+  repositories/  Interfaces Spring Data JPA
+  models/        Entités JPA
+  dtos/          Records d'entrée
+  configs/       Configuration Spring
+frontend/src/
+  api/           Appels au backend
+  types/         Types miroir du backend
+  components/    Composants réutilisables (filtres, cartes, graphique, tableau)
+  views/         Pages (tableau de bord, transactions, comptes)
+  router/        Routes
+  utils/         Formatage (montants, dates)
+docs/            Collection Postman, prompts
 ```
