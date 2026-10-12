@@ -3,26 +3,24 @@
 export type TitulaireCompte = 'MARIO' | 'CRISTINA' | 'CONJOINT'
 export type TypeCompte = 'COURANT' | 'CARTE_CREDIT'
 export type TypeTransaction = 'DEPENSE' | 'REVENU' | 'EPARGNE' | 'TRANSFERT_INTERNE'
-export type CategorieDepense =
-  | 'ALIMENTATION'
-  | 'PHARMACIE'
-  | 'ANIMAUX'
-  | 'LOGEMENT'
-  | 'TRANSPORT'
-  | 'LOISIRS'
-  | 'AUTRE'
+// Nom d'une catégorie (CategorieModele.nom) : la liste vient de GET /categories.
+export type CategorieDepense = string
 
 export const TITULAIRES: TitulaireCompte[] = ['MARIO', 'CRISTINA', 'CONJOINT']
 export const TYPES_COMPTE: TypeCompte[] = ['COURANT', 'CARTE_CREDIT']
-export const CATEGORIES: CategorieDepense[] = [
-  'ALIMENTATION',
-  'PHARMACIE',
-  'ANIMAUX',
-  'LOGEMENT',
-  'TRANSPORT',
-  'LOISIRS',
-  'AUTRE',
-]
+
+// CategorieModele
+export interface Categorie {
+  id: string
+  nom: CategorieDepense
+  description: string
+}
+
+// CategorieEnregistrementDto (corps de POST /categories)
+export interface CategorieEnregistrement {
+  nom: CategorieDepense
+  description: string
+}
 
 // CompteModele
 export interface Compte {
@@ -39,7 +37,7 @@ export interface CompteEnregistrement {
   typeCompte: TypeCompte
 }
 
-// TransactionModele, tel qu'inclus dans un relevé
+// TransactionModele, tel qu'inclus dans un relevé (et réponse de PATCH /transactions/{id}/categorie)
 export interface TransactionReleve {
   id: string
   date: string
@@ -71,6 +69,7 @@ export interface Agregation {
 
 // TransactionAffichageDto
 export interface Transaction {
+  id: string
   date: string
   description: string
   montant: number
@@ -78,6 +77,11 @@ export interface Transaction {
   categorie: CategorieDepense | null
   compteNom: string
   titulaire: TitulaireCompte
+}
+
+// TransactionCategorieEnregistrementDto (corps de PATCH /transactions/{id}/categorie)
+export interface TransactionCategorieEnregistrement {
+  categorie: CategorieDepense
 }
 
 // Filtres communs à /agregations et /transactions. Une chaîne vide = pas de filtre.

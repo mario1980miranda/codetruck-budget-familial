@@ -1,7 +1,6 @@
 package com.decoder.budgetfamilial.services;
 
 import com.decoder.budgetfamilial.dtos.AgregationDto;
-import com.decoder.budgetfamilial.models.CategorieDepense;
 import com.decoder.budgetfamilial.models.TitulaireCompte;
 import com.decoder.budgetfamilial.models.TypeCompte;
 import com.decoder.budgetfamilial.models.TypeTransaction;
@@ -10,9 +9,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 
 @Service
@@ -29,10 +28,10 @@ public class AgregationService {
     // épargne sur la période demandée avec les mêmes filtres.
     public AgregationDto calculer(LocalDate debut, LocalDate fin, TitulaireCompte titulaire,
                                   UUID compteId, TypeCompte typeCompte) {
-        Map<CategorieDepense, BigDecimal> depensesParCategorie = new EnumMap<>(CategorieDepense.class);
+        Map<String, BigDecimal> depensesParCategorie = new TreeMap<>();
         List<Object[]> lignes = transactionRepository.totauxParCategorie(debut, fin, titulaire, compteId, typeCompte);
         for (Object[] ligne : lignes) {
-            depensesParCategorie.put((CategorieDepense) ligne[0], (BigDecimal) ligne[1]);
+            depensesParCategorie.put((String) ligne[0], (BigDecimal) ligne[1]);
         }
 
         BigDecimal totalDepenses = depensesParCategorie.values().stream()

@@ -43,9 +43,8 @@ public class TransactionModele implements Serializable {
     @Column(nullable = false, length = 20)
     private TypeTransaction typeTransaction;
 
-    @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    private CategorieDepense categorie;
+    private String categorie;
 
     public TransactionModele() {
     }
@@ -98,11 +97,11 @@ public class TransactionModele implements Serializable {
         this.typeTransaction = typeTransaction;
     }
 
-    public CategorieDepense getCategorie() {
+    public String getCategorie() {
         return categorie;
     }
 
-    public void setCategorie(CategorieDepense categorie) {
+    public void setCategorie(String categorie) {
         this.categorie = categorie;
     }
 }

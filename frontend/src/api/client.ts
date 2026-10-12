@@ -36,6 +36,39 @@ export async function envoyer<T>(chemin: string, corps: object | FormData): Prom
   return lireReponse<T>(reponse, chemin)
 }
 
+// Envoie un PATCH avec un corps JSON (modification partielle d'une ressource).
+export async function modifier<T>(chemin: string, corps: object): Promise<T> {
+  const reponse = await fetch(`${PREFIXE_API}${chemin}`, {
+    method: 'PATCH',
+    headers: { 'X-API-VERSION': VERSION_API, 'Content-Type': 'application/json' },
+    body: JSON.stringify(corps),
+  })
+  return lireReponse<T>(reponse, chemin)
+}
+
+// Envoie un PUT avec un corps JSON (remplacement complet d'une ressource).
+export async function remplacer<T>(chemin: string, corps: object): Promise<T> {
+  const reponse = await fetch(`${PREFIXE_API}${chemin}`, {
+    method: 'PUT',
+    headers: { 'X-API-VERSION': VERSION_API, 'Content-Type': 'application/json' },
+    body: JSON.stringify(corps),
+  })
+  return lireReponse<T>(reponse, chemin)
+}
+
+// Envoie un DELETE ; le backend répond par un message texte (ex. "Catégorie
+// supprimée avec succès."), retourné tel quel.
+export async function supprimer(chemin: string): Promise<string> {
+  const reponse = await fetch(`${PREFIXE_API}${chemin}`, {
+    method: 'DELETE',
+    headers: { 'X-API-VERSION': VERSION_API },
+  })
+  if (reponse.ok) {
+    return reponse.text()
+  }
+  return lireReponse<string>(reponse, chemin)
+}
+
 // Retourne le JSON si le statut est 2xx ; sinon lève une erreur avec le message
 // renvoyé par le backend (texte brut comme "Compte introuvable.") quand il y en a un.
 async function lireReponse<T>(reponse: Response, chemin: string): Promise<T> {

@@ -1,6 +1,5 @@
 package com.decoder.budgetfamilial.dtos;
 
-import com.decoder.budgetfamilial.models.CategorieDepense;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,5 +11,5 @@ public record AgregationDto(
         BigDecimal totalRevenus,
         BigDecimal totalDepenses,
         BigDecimal totalEpargne,
-        Map<CategorieDepense, BigDecimal> depensesParCategorie) {
+        Map<String, BigDecimal> depensesParCategorie) {
 }

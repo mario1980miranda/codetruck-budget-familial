@@ -1,6 +1,5 @@
 package com.decoder.budgetfamilial.dtos;
 
-import com.decoder.budgetfamilial.models.CategorieDepense;
 import com.decoder.budgetfamilial.models.TypeTransaction;
 
 import java.math.BigDecimal;
@@ -11,5 +10,5 @@ public record TransactionExtraiteDto(
         String description,
         BigDecimal montant,
         TypeTransaction typeTransaction,
-        CategorieDepense categorie) {
+        String categorie) {
 }

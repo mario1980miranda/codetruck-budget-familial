@@ -10,6 +10,7 @@ import { RouterLink, RouterView } from 'vue-router'
         <RouterLink to="/">Tableau de bord</RouterLink>
         <RouterLink to="/transactions">Transactions</RouterLink>
         <RouterLink to="/comptes">Comptes</RouterLink>
+        <RouterLink to="/categories">Catégories</RouterLink>
         <RouterLink to="/import">Importer</RouterLink>
       </nav>
     </header>

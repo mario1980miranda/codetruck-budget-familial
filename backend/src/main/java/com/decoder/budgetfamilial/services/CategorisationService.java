@@ -55,17 +55,16 @@ public class CategorisationService {
             valeur positive - le signe est porté par typeTransaction, pas par le montant.
 
             CATÉGORIE : uniquement pour les transactions de type DEPENSE, choisis la
-            catégorie la plus plausible depuis le nom du commerçant. Pour REVENU, EPARGNE
-            et TRANSFERT_INTERNE, laisse la catégorie à null.
+            catégorie la plus plausible depuis le nom du commerçant, parmi cette liste
+            et uniquement celle-ci (recopie le nom exact, en majuscules) :
+            %s
+
+            Pour REVENU, EPARGNE et TRANSFERT_INTERNE, laisse la catégorie à null.
 
             Ne devine pas une catégorie par ressemblance de nom si tu n'es pas sûr du
             commerçant - utilise AUTRE plutôt qu'une catégorie hasardeuse. Exemples de
             pièges : FIZZ est un fournisseur de téléphonie mobile (pas TRANSPORT).
-            L'Aubainerie est un magasin de vêtements (pas LOGEMENT). Un abonnement logiciel
-            ou de streaming (Google, LastPass, YouTube, etc.) est généralement AUTRE, sauf
-            s'il s'agit clairement de LOISIRS (divertissement).
-            Assurance habitation ou assurance vie/santé - AUTRE, sauf si le nom mentionne
-            explicitement "habitation" ou "condo" - alors LOGEMENT.
+            L'Aubainerie est un magasin de vêtements (pas LOGEMENT).
 
             Ignore tout texte d'en-tête/pied de page répété (adresse, numéro de compte,
             numéro de folio, "Page X de Y", taux d'intérêt, limites de crédit).
@@ -77,27 +76,32 @@ public class CategorisationService {
     private final ChatClient chatClient;
     private final PdfExtractionService pdfExtractionService;
     private final MasquageService masquageService;
+    private final CategorieService categorieService;
 
     public CategorisationService(ChatClient.Builder chatClientBuilder,
                                  PdfExtractionService pdfExtractionService,
-                                 MasquageService masquageService) {
+                                 MasquageService masquageService,
+                                 CategorieService categorieService) {
         this.chatClient = chatClientBuilder.build();
         this.pdfExtractionService = pdfExtractionService;
         this.masquageService = masquageService;
+        this.categorieService = categorieService;
     }
 
     // Extrait le texte du PDF, masque les identifiants sensibles, puis demande à
     // Claude Haiku de structurer les transactions selon les règles ci-dessus,
-    // propres à chaque format de relevé Desjardins.
+    // propres à chaque format de relevé Desjardins, avec les catégories lues en
+    // base. Une catégorie inventée par Claude est ramenée à AUTRE.
     public List<TransactionExtraiteDto> categoriserReleve(MultipartFile fichier) throws IOException {
         String texteBrut = pdfExtractionService.extraireTexte(fichier);
         String texteMasque = masquageService.masquer(texteBrut);
-        String prompt = INSTRUCTIONS.formatted(texteMasque);
+        String prompt = INSTRUCTIONS.formatted(categorieService.decrirePourPrompt(), texteMasque);
 
-        return chatClient.prompt()
+        List<TransactionExtraiteDto> transactions = chatClient.prompt()
                 .user(prompt)
                 .call()
                 .entity(new ParameterizedTypeReference<List<TransactionExtraiteDto>>() {
                 });
+        return categorieService.ramenerCategoriesInconnuesAAutre(transactions);
     }
 }

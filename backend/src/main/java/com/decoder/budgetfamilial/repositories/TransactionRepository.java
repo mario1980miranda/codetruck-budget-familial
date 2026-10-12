@@ -1,6 +1,5 @@
 package com.decoder.budgetfamilial.repositories;
 
-import com.decoder.budgetfamilial.models.CategorieDepense;
 import com.decoder.budgetfamilial.models.TitulaireCompte;
 import com.decoder.budgetfamilial.models.TransactionModele;
 import com.decoder.budgetfamilial.models.TypeCompte;
@@ -61,8 +60,10 @@ public interface TransactionRepository extends JpaRepository<TransactionModele, 
             """)
     List<TransactionModele> rechercher(@Param("debut") LocalDate debut,
                                        @Param("fin") LocalDate fin,
-                                       @Param("categorie") CategorieDepense categorie,
+                                       @Param("categorie") String categorie,
                                        @Param("titulaire") TitulaireCompte titulaire,
                                        @Param("compteId") UUID compteId,
                                        @Param("typeCompte") TypeCompte typeCompte);
+
+    boolean existsByCategorie(String categorie);
 }

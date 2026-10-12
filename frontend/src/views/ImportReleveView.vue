@@ -2,14 +2,16 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import TableauTransactions from '@/components/TableauTransactions.vue'
+import { listerCategories } from '@/api/categories'
 import { listerComptes } from '@/api/comptes'
 import { importerReleve } from '@/api/releves'
-import type { Compte, Releve, Transaction } from '@/types/budget'
+import type { Categorie, Compte, Releve, Transaction } from '@/types/budget'
 import { libelle } from '@/utils/format'
 
 const route = useRoute()
 
 const comptes = ref<Compte[]>([])
+const categories = ref<Categorie[]>([])
 const compteId = ref(typeof route.query.compteId === 'string' ? route.query.compteId : '')
 const fichier = ref<File | null>(null)
 const enCours = ref(false)
@@ -30,9 +32,12 @@ const transactionsImportees = computed<Transaction[]>(() => {
   }))
 })
 
+// Charge les comptes (liste déroulante du formulaire) et les catégories
+// (affichées dans le tableau des transactions importées).
 onMounted(async () => {
   try {
     comptes.value = await listerComptes()
+    categories.value = await listerCategories()
   } catch (e) {
     erreur.value = (e as Error).message
   }
@@ -104,7 +109,7 @@ async function importer() {
           <span class="chiffre">{{ releve.periodeFin }}</span></template
         >.
       </p>
-      <TableauTransactions :transactions="transactionsImportees" />
+      <TableauTransactions :transactions="transactionsImportees" :categories="categories" />
     </div>
   </section>
 </template>

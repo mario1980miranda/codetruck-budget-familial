@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { Doughnut } from 'vue-chartjs'
 import { ArcElement, Chart as ChartJS, Legend, Tooltip, type TooltipItem } from 'chart.js'
-import { CATEGORIES, type CategorieDepense } from '@/types/budget'
+import type { CategorieDepense } from '@/types/budget'
 import { formaterMontant, libelle } from '@/utils/format'
 
 ChartJS.register(ArcElement, Tooltip, Legend)
@@ -16,19 +16,26 @@ const COULEURS_CATEGORIES: Record<CategorieDepense, string> = {
   LOISIRS: '#8B5A8F',
   AUTRE: '#8A8378',
 }
+const PALETTE_SUPPLEMENTAIRE = ['#C2703D', '#2F7F7A', '#9C7A2E', '#5B4E8C', '#A04E6E', '#6F8B3A', '#3D6E9E', '#7D5A44']
 
 const props = defineProps<{ depensesParCategorie: Partial<Record<CategorieDepense, number>> }>()
 
 const categoriesPresentes = computed(() =>
-  CATEGORIES.filter((categorie) => (props.depensesParCategorie[categorie] ?? 0) > 0),
+  Object.keys(props.depensesParCategorie).filter((categorie) => (props.depensesParCategorie[categorie] ?? 0) > 0),
 )
+
+// Couleur fixe pour les catégories d'origine ; une catégorie créée ensuite
+// prend une couleur de PALETTE_SUPPLEMENTAIRE selon sa position dans le graphique.
+function couleur(categorie: CategorieDepense, position: number): string {
+  return COULEURS_CATEGORIES[categorie] ?? PALETTE_SUPPLEMENTAIRE[position % PALETTE_SUPPLEMENTAIRE.length]!
+}
 
 const donnees = computed(() => ({
   labels: categoriesPresentes.value.map(libelle),
   datasets: [
     {
       data: categoriesPresentes.value.map((categorie) => props.depensesParCategorie[categorie] ?? 0),
-      backgroundColor: categoriesPresentes.value.map((categorie) => COULEURS_CATEGORIES[categorie]),
+      backgroundColor: categoriesPresentes.value.map(couleur),
       borderWidth: 2,
       borderColor: '#FAF7F0',
     },
